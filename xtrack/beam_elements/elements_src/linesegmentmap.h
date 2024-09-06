@@ -224,12 +224,32 @@ void longitudinal_motion(LocalParticle *part0,
 
         double const alfp =
             LineSegmentMapData_get_momentum_compaction_factor(el);
+        double const alfp_1 =
+            LineSegmentMapData_get_high_order_momentum_compaction_factor(el, 0);
+        double const alfp_2 =
+            LineSegmentMapData_get_high_order_momentum_compaction_factor(el, 1);
         double const slippage_length =
             LineSegmentMapData_get_slippage_length(el);
 
         //start_per_particle_block (part->part)
             double const gamma0 = LocalParticle_get_gamma0(part);
-            double const eta = alfp - 1.0 / (gamma0 * gamma0);
+            double const gamma0_squared = gamma0 * gamma0;
+            double const beta0  = LocalParticle_get_beta0(part);
+            double const beta0_squared = beta0 * beta0;
+
+            double const eta0 = alfp - 1.0 / (gamma0 * gamma0);
+            double const eta1 = (alfp_1
+                                 + 3.0 * beta0_squared / (2.0 * gamma0_squared)
+                                 - eta0 / (gamma0_squared));
+            double const eta2 = (alfp_2
+                                 + alfp_1 / gamma0_squared
+                                 - 2.0 * beta0_squared * beta0_squared / gamma0_squared
+                                 + 3.0 * alfp * beta0_squared / (2 * gamma0_squared)
+                                 + eta0 / (gamma0_squared * gamma0_squared));
+
+            // double const eta = eta0 + eta1 * LocalParticle_get_delta(part) + eta2 * LocalParticle_get_delta(part)* LocalParticle_get_delta(part);
+            double eta = eta0 + eta1 * LocalParticle_get_delta(part) + eta2 * LocalParticle_get_delta(part)* LocalParticle_get_delta(part);
+
             LocalParticle_add_to_zeta(part,
                 -0.5 * eta * slippage_length * LocalParticle_get_delta(part));
         //end_per_particle_block
@@ -258,7 +278,23 @@ void longitudinal_motion(LocalParticle *part0,
 
         //start_per_particle_block (part->part)
             double const gamma0 = LocalParticle_get_gamma0(part);
-            double const eta = alfp - 1.0 / (gamma0 * gamma0);
+            double const gamma0_squared = gamma0 * gamma0;
+            double const beta0  = LocalParticle_get_beta0(part);
+            double const beta0_squared = beta0 * beta0;
+
+            double const eta0 = alfp - 1.0 / (gamma0 * gamma0);
+            double const eta1 = (alfp_1
+                                + 3.0 * beta0_squared / (2.0 * gamma0_squared)
+                                - eta0 / (gamma0_squared));
+
+            double const eta2 = (alfp_2
+                                 + alfp_1 / gamma0_squared
+                                 - 2.0 * beta0_squared * beta0_squared / gamma0_squared
+                                 + 3.0 * alfp * beta0_squared / (2 * gamma0_squared)
+                                 + eta0 / (gamma0_squared * gamma0_squared));
+
+            double const eta = eta0 + eta1 * LocalParticle_get_delta(part) + eta2 * LocalParticle_get_delta(part)* LocalParticle_get_delta(part);
+
             LocalParticle_add_to_zeta(part,
                 -0.5 * eta * slippage_length * LocalParticle_get_delta(part));
         //end_per_particle_block

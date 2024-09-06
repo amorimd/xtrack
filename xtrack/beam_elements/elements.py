@@ -1784,6 +1784,7 @@ class LineSegmentMap(BeamElement):
         'qs': xo.Float64,
         'bets': xo.Float64,
         'momentum_compaction_factor': xo.Float64,
+        'high_order_momentum_compaction_factor': xo.Float64[2],
         'slippage_length': xo.Float64,
         'voltage_rf': xo.Float64[:],
         'frequency_rf': xo.Float64[:],
@@ -1811,6 +1812,7 @@ class LineSegmentMap(BeamElement):
             longitudinal_mode=None,
             qs=None, bets=None,
             momentum_compaction_factor=None,
+            high_order_momentum_compaction_factor=0.0,
             slippage_length=None,
             voltage_rf=None, frequency_rf=None, lag_rf=None,
             dqx=0.0, dqy=0.0, ddqx=0.0, ddqy=0.0, dnqx=None, dnqy=None,
@@ -1893,6 +1895,9 @@ class LineSegmentMap(BeamElement):
         momentum_compaction_factor : float
             Momentum compaction factor of the segment. Only used if
             ``longitudinal_mode`` is ``'nonlinear'`` or ``'linear_fixed_rf'``.
+        higher_order_momentum_compaction_factor : tuple of length 2 or float.
+            Second and third order terms of the momentum compaction factor of the segment. Only used if
+            ``longitudinal_mode`` is ``'nonlinear'``. Optional, default is ``0``.
         slippage_length : float
             Slippage length of the segment. Only used if ``longitudinal_mode``
             is ``'nonlinear'`` or ``'linear_fixed_rf'``. If not given, the
@@ -2071,6 +2076,11 @@ dqx : float or list of float
             assert (len(nargs['frequency_rf'])
                     == len(nargs['lag_rf'])
                     == len(nargs['voltage_rf']))
+
+            if np.isscalar(high_order_momentum_compaction_factor): high_order_momentum_compaction_factor = [high_order_momentum_compaction_factor, high_order_momentum_compaction_factor]
+            else: assert len(high_order_momentum_compaction_factor) == 2
+            nargs['high_order_momentum_compaction_factor'] = high_order_momentum_compaction_factor
+
 
             if longitudinal_mode == 'linear_fixed_rf':
                 assert len(nargs['frequency_rf']) == 1
